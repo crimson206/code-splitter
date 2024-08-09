@@ -113,7 +113,7 @@ def secondary_chunking(
     docstring = ast.get_docstring(class_node)
     if docstring:
         first_stmt = class_node.body[0]
-        if isinstance(first_stmt, ast.Expr) and isinstance(first_stmt.value, ast.Str):
+        if isinstance(first_stmt, ast.Expr) and isinstance(first_stmt.value, ast.Constant) and isinstance(first_stmt.value.value, str):
             class_end = first_stmt.end_lineno
 
     class_code = get_code_segment(lines, class_start, class_end)
@@ -129,7 +129,6 @@ def secondary_chunking(
         )
     )
 
-    # 클래스 내의 다른 요소들을 청크로 만듭니다
     for node in class_node.body:
         if isinstance(node, ast.FunctionDef):
             code = get_code_segment(lines, node.lineno, node.end_lineno)
@@ -146,7 +145,8 @@ def secondary_chunking(
             )
         elif not (
             isinstance(node, ast.Expr)
-            and isinstance(node.value, ast.Str)
+            and isinstance(node.value, ast.Constant)
+            and isinstance(node.value.value, str)
             and node.lineno == class_node.body[0].lineno
         ):
             # docstring이 아닌 경우에만 추가합니다
