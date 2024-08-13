@@ -146,6 +146,10 @@ options = Options(
     discussion=False
 )
 
+dependencies = [
+    "crimson-intelli-type==0.4.0",
+    "crimson-file-loader==0.1.3",
+]
 
 # Define the general information of your package
 kwargs = Kwargs(
@@ -155,7 +159,7 @@ kwargs = Kwargs(
     description="Split code for code generation.",
     # https://pypi.org/classifiers/
     topics=["Topic :: Software Development :: Libraries :: Python Modules"],
-    dependencies=["crimson-intelli-type==0.4.0"],
+    dependencies=dependencies,
 )
 
 
