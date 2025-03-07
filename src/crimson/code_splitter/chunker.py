@@ -3,6 +3,19 @@ import ast
 
 
 class Chunk:
+    """
+    Base class for representing a chunk of code.
+    
+    A chunk is a segment of code with metadata including type, name, line numbers, and content.
+    
+    Attributes:
+        type (Literal["class", "function", "extra"]): The type of code chunk
+        name (str): The name identifier of the chunk
+        start_line (int): The starting line number in the source
+        end_line (int): The ending line number in the source
+        code (str): The actual code content
+        path (Optional[str]): File path of the source, if available
+    """
     def __init__(
         self,
         type: Literal["class", "function", "extra"],
@@ -24,6 +37,15 @@ class Chunk:
 
 
 class InClassChunk(Chunk):
+    """
+    Represents a code chunk that exists within a class definition.
+    
+    Extends the Chunk class with additional parent class information.
+    
+    Attributes:
+        parent (str): The name of the parent class containing this chunk
+        + all attributes inherited from Chunk
+    """
     def __init__(
         self,
         type: Literal["class", "function", "extra"],
@@ -39,6 +61,16 @@ class InClassChunk(Chunk):
 
 
 class CodeChunk(Chunk):
+    """
+    Represents a top-level code chunk that may contain sub-chunks.
+    
+    A CodeChunk can be a class definition with methods, a function definition,
+    or other standalone code.
+    
+    Attributes:
+        sub_chunks (List[InClassChunk]): List of chunks contained within this chunk
+        + all attributes inherited from Chunk
+    """
     def __init__(
         self,
         type: Literal["class", "function", "extra"],
@@ -54,6 +86,19 @@ class CodeChunk(Chunk):
 
 
 def chunk_code(source_code: str, path: str = None) -> List[CodeChunk]:
+    """
+    Parse Python source code and break it into code chunks.
+    
+    This function analyzes Python source code using the AST parser and divides it
+    into logical chunks representing classes, functions, and other code segments.
+    
+    Args:
+        source_code (str): The Python source code to be chunked
+        path (str, optional): The file path of the source code
+        
+    Returns:
+        List[CodeChunk]: A list of CodeChunk objects representing the parsed source
+    """
     tree = ast.parse(source_code)
     lines = source_code.splitlines()
     chunks: List[CodeChunk] = []
@@ -102,6 +147,21 @@ def chunk_code(source_code: str, path: str = None) -> List[CodeChunk]:
 def secondary_chunking(
     class_node: ast.ClassDef, lines: List[str], path: Optional[str] = None
 ) -> List[InClassChunk]:
+    """
+    Parse the contents of a class definition into sub-chunks.
+    
+    This function processes a class AST node and creates chunks for its methods
+    and other contents.
+    
+    Args:
+        class_node (ast.ClassDef): AST node representing a class definition
+        lines (List[str]): Source code lines
+        path (Optional[str], optional): The file path of the source code
+        
+    Returns:
+        List[InClassChunk]: A list of InClassChunk objects representing the class contents
+    """
+
     sub_chunks: List[InClassChunk] = []
 
     # 클래스 선언부와 docstring을 첫 번째 청크로 만듭니다
@@ -167,4 +227,16 @@ def secondary_chunking(
 
 
 def get_code_segment(lines: List[str], start: int, end: int) -> str:
+    """
+    Extract a segment of code from a list of source lines.
+    
+    Args:
+        lines (List[str]): List of source code lines
+        start (int): Starting line number (1-indexed)
+        end (int): Ending line number (1-indexed)
+        
+    Returns:
+        str: The extracted code segment as a string
+    """
+
     return "\n".join(lines[start - 1 : end])
